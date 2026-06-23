@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+netdet/
+*.egg-info/
+dist/
+build/
+.ipynb_checkpoints/
+.DS_Store
+from_scratch_guide.md
+pkl_explanation.md
+project_walkthrough.md

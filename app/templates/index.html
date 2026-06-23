@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 CyberSec IDS — Network Threat Detector</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        :root {
+            --bg-primary: #0a0b10;
+            --bg-secondary: #11131c;
+            --card-bg: rgba(20, 24, 39, 0.65);
+            --card-border: rgba(255, 255, 255, 0.08);
+            
+            --accent-blue: #3b82f6;
+            --accent-blue-glow: rgba(59, 130, 246, 0.3);
+            --accent-green: #10b981;
+            --accent-green-glow: rgba(16, 185, 129, 0.35);
+            --accent-red: #ef4444;
+            --accent-red-glow: rgba(239, 68, 68, 0.45);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-primary);
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(239, 68, 68, 0.08) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            background: rgba(10, 11, 16, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+            color: var(--accent-blue);
+            text-shadow: 0 0 10px var(--accent-blue-glow);
+        }
+
+        .logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #fff 30%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 8px var(--accent-green); }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        main {
+            flex: 1;
+            padding: 30px 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.14);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 12px;
+        }
+
+        .card-title i {
+            color: var(--accent-blue);
+        }
+
+        /* Forms & Inputs */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            background: rgba(10, 11, 16, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 8px var(--accent-blue-glow);
+            background: rgba(10, 11, 16, 0.9);
+        }
+
+        /* Sliders */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            cursor: pointer;
+            box-shadow: 0 0 6px var(--accent-blue-glow);
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #fff;
+            box-shadow: 0 0 10px var(--accent-blue);
+        }
+
+        .slider-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            width: 38px;
+            text-align: right;
+            color: var(--accent-blue);
+        }
+
+        .btn-submit {
+            grid-column: span 2;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #1e40af 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--accent-blue-glow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
+            background: linear-gradient(135deg, #60a5fa 0%, var(--accent-blue) 100%);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Presets Sidebar */
+        .presets-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .preset-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .preset-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-blue);
+            transform: translateX(4px);
+        }
+
+        .preset-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .preset-icon.normal {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .preset-icon.attack {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .preset-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .preset-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .preset-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Results / HUD */
+        .hud-placeholder {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px 20px;
+            gap: 16px;
+        }
+
+        .hud-placeholder i {
+            font-size: 48px;
+            color: rgba(255, 255, 255, 0.05);
+        }
+
+        .hud-content {
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .result-header {
+            text-align: center;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .result-header.normal::before {
+            background: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        .result-header.attack::before {
+            background: var(--accent-red);
+            box-shadow: 0 0 10px var(--accent-red);
+        }
+
+        .threat-status-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .threat-status-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin: 6px 0;
+            text-transform: uppercase;
+        }
+
+        .result-header.normal .threat-status-value {
+            color: var(--accent-green);
+            text-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .result-header.attack .threat-status-value {
+            color: var(--accent-red);
+            text-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Meter Gauge */
+        .gauge-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .gauge-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent-blue) 0%, rgba(255, 255, 255, 0.05) 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+            transition: background 0.8s ease;
+        }
+
+        .gauge-inner {
+            width: 120px;
+            height: 120px;
+            background: #11131c;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--card-border);
+        }
+
+        .gauge-percentage {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 28px;
+            color: #fff;
+        }
+
+        .gauge-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* Metrics List */
+        .metrics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .metric-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .metric-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .metric-title {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .metric-val {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-blue);
+            border-radius: 3px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Anomaly alert box */
+        .anomaly-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .anomaly-box.flagged {
+            background: rgba(239, 68, 68, 0.06);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .anomaly-box.flagged i {
+            color: var(--accent-red);
+            font-size: 18px;
+            animation: ring 1.5s infinite;
+        }
+
+        .anomaly-box.clean {
+            background: rgba(16, 185, 129, 0.05);
+            border-color: rgba(16, 185, 129, 0.25);
+            color: #a7f3d0;
+        }
+
+        .anomaly-box.clean i {
+            color: var(--accent-green);
+            font-size: 18px;
+        }
+
+        @keyframes ring {
+            0% { transform: rotate(0); }
+            10% { transform: rotate(15deg); }
+            20% { transform: rotate(-10deg); }
+            30% { transform: rotate(10deg); }
+            40% { transform: rotate(-5deg); }
+            50% { transform: rotate(0); }
+            100% { transform: rotate(0); }
+        }
+
+        /* Loader Animation */
+        .loader-wrapper {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 60px 0;
+            gap: 20px;
+        }
+
+        .radar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid rgba(59, 130, 246, 0.1);
+            position: relative;
+        }
+
+        .radar::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: var(--accent-blue);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-blue);
+            animation: pulse-text 1.5s infinite;
+        }
+
+        @keyframes pulse-text {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--card-border);
+            margin-top: 40px;
+            background: rgba(10, 11, 16, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <i class="fa-solid fa-shield-halved logo-icon"></i>
+            <span class="logo-text">CYBERSEC IDS</span>
+        </div>
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            <span>DETECTOR STATUS: OPERATIONAL</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- Center Grid Panel -->
+        <div class="dashboard-grid">
+            <!-- Parameters Form -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Network Session Parameters</span>
+                </div>
+                
+                <form id="predictForm" class="form-grid">
+                    <div class="form-group">
+                        <label for="duration">Duration (seconds)</label>
+                        <input type="number" id="duration" name="duration" step="any" min="0" value="0.0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="protocol_type">Protocol Type</label>
+                        <select id="protocol_type" name="protocol_type" required>
+                            <option value="tcp">TCP</option>
+                            <option value="udp">UDP</option>
+                            <option value="icmp">ICMP</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="src_bytes">Source Bytes</label>
+                        <input type="number" id="src_bytes" name="src_bytes" min="0" value="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dst_bytes">Destination Bytes</label>
+                        <input type="number" id="dst_bytes" name="dst_bytes" min="0" value="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="count">Connections to same host (last 2s)</label>
+                        <input type="number" id="count" name="count" min="0" value="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="srv_count">Connections to same service (last 2s)</label>
+                        <input type="number" id="srv_count" name="srv_count" min="0" value="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Same Service Rate</label>
+                        <div class="slider-container">
+                            <input type="range" id="same_srv_rate" name="same_srv_rate" min="0" max="1" step="0.01" value="1.0">
+                            <span class="slider-value" id="same_srv_rate_val">1.0</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Different Service Rate</label>
+                        <div class="slider-container">
+                            <input type="range" id="diff_srv_rate" name="diff_srv_rate" min="0" max="1" step="0.01" value="0.0">
+                            <span class="slider-value" id="diff_srv_rate_val">0.0</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dst_host_count">Dst Host Count</label>
+                        <input type="number" id="dst_host_count" name="dst_host_count" min="0" value="100" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dst_host_srv_count">Dst Host Srv Count</label>
+                        <input type="number" id="dst_host_srv_count" name="dst_host_srv_count" min="0" value="100" required>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Analyze Session Traffic</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Analysis HUD Display -->
+            <div class="card" style="display: flex; flex-direction: column;">
+                <div class="card-title">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Real-time Analysis Output</span>
+                </div>
+
+                <!-- Placeholder state -->
+                <div class="hud-placeholder" id="hudPlaceholder">
+                    <i class="fa-solid fa-terminal"></i>
+                    <p>Configure session variables and trigger execution to render prediction telemetry.</p>
+                </div>
+
+                <!-- Loader -->
+                <div class="loader-wrapper" id="hudLoader">
+                    <div class="radar"></div>
+                    <span class="loader-text">Analyzing Packet Signatures...</span>
+                </div>
+
+                <!-- HUD content results -->
+                <div class="hud-content" id="hudResult">
+                    <div class="result-header" id="resultHeader">
+                        <span class="threat-status-label" id="resultLabelLabel">Session Classification</span>
+                        <div class="threat-status-value" id="resultLabelVal">---</div>
+                    </div>
+
+                    <div class="gauge-wrapper">
+                        <div class="gauge-circle" id="gaugeCircle">
+                            <div class="gauge-inner">
+                                <span class="gauge-percentage" id="gaugeVal">0%</span>
+                                <span class="gauge-label">Confidence</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metrics-list">
+                        <!-- Attack Prob -->
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span class="metric-title">Attack Probability</span>
+                                <span class="metric-val" id="metricAttackProb">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" id="metricAttackBar" style="background: var(--accent-red);"></div>
+                            </div>
+                        </div>
+
+                        <!-- Anomaly Score -->
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span class="metric-title">Isolation Anomaly Score</span>
+                                <span class="metric-val" id="metricIsoScore">0.000</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" id="metricIsoBar"></div>
+                            </div>
+                        </div>
+
+                        <!-- Outlier Box Alert -->
+                        <div class="anomaly-box" id="anomalyAlertBox">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span id="anomalyAlertText">No anomalous behavior detected.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Presets Sidebar -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Traffic Presets</span>
+            </div>
+            <div class="presets-list">
+                
+                <div class="preset-card" data-preset="normal-web">
+                    <div class="preset-icon normal">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <div class="preset-info">
+                        <span class="preset-name">Normal Web Browse</span>
+                        <span class="preset-desc">Standard HTTP/TCP connection</span>
+                    </div>
+                </div>
+
+                <div class="preset-card" data-preset="syn-flood">
+                    <div class="preset-icon attack">
+                        <i class="fa-solid fa-volcano"></i>
+                    </div>
+                    <div class="preset-info">
+                        <span class="preset-name">DDoS / SYN Flood</span>
+                        <span class="preset-desc">Rapid incomplete TCP requests</span>
+                    </div>
+                </div>
+
+                <div class="preset-card" data-preset="udp-scan">
+                    <div class="preset-icon attack">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                    </div>
+                    <div class="preset-info">
+                        <span class="preset-name">Port Scanning (UDP)</span>
+                        <span class="preset-desc">Broad probing of local ports</span>
+                    </div>
+                </div>
+
+                <div class="preset-card" data-preset="ping-death">
+                    <div class="preset-icon attack">
+                        <i class="fa-solid fa-skull-crossbones"></i>
+                    </div>
+                    <div class="preset-info">
+                        <span class="preset-name">Ping of Death</span>
+                        <span class="preset-desc">Oversized payload packets</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>🔒 CyberSec Network Threat Detector — Powered by Random Forest & Isolation Forest Models via Flask</p>
+    </footer>
+
+    <script>
+        // JS Object holding presets
+        const presets = {
+            'normal-web': {
+                duration: 0.1,
+                protocol_type: 'tcp',
+                src_bytes: 450,
+                dst_bytes: 3500,
+                count: 1,
+                srv_count: 1,
+                same_srv_rate: 1.0,
+                diff_srv_rate: 0.0,
+                dst_host_count: 50,
+                dst_host_srv_count: 50
+            },
+            'syn-flood': {
+                duration: 0.0,
+                protocol_type: 'tcp',
+                src_bytes: 0,
+                dst_bytes: 0,
+                count: 512,
+                srv_count: 2,
+                same_srv_rate: 0.03,
+                diff_srv_rate: 0.97,
+                dst_host_count: 255,
+                dst_host_srv_count: 5
+            },
+            'udp-scan': {
+                duration: 0.0,
+                protocol_type: 'udp',
+                src_bytes: 28,
+                dst_bytes: 0,
+                count: 450,
+                srv_count: 1,
+                same_srv_rate: 0.15,
+                diff_srv_rate: 0.85,
+                dst_host_count: 255,
+                dst_host_srv_count: 3
+            },
+            'ping-death': {
+                duration: 0.05,
+                protocol_type: 'icmp',
+                src_bytes: 65500,
+                dst_bytes: 0,
+                count: 300,
+                srv_count: 1,
+                same_srv_rate: 0.05,
+                diff_srv_rate: 0.95,
+                dst_host_count: 255,
+                dst_host_srv_count: 2
+            }
+        };
+
+        $(document).ready(function() {
+            // Slider value updates
+            $('#same_srv_rate').on('input', function() {
+                $('#same_srv_rate_val').text(this.value);
+            });
+
+            $('#diff_srv_rate').on('input', function() {
+                $('#diff_srv_rate_val').text(this.value);
+            });
+
+            // Preset Selection click event
+            $('.preset-card').click(function() {
+                const presetKey = $(this).attr('data-preset');
+                const p = presets[presetKey];
+                
+                if (p) {
+                    $('#duration').val(p.duration);
+                    $('#protocol_type').val(p.protocol_type);
+                    $('#src_bytes').val(p.src_bytes);
+                    $('#dst_bytes').val(p.dst_bytes);
+                    $('#count').val(p.count);
+                    $('#srv_count').val(p.srv_count);
+                    $('#same_srv_rate').val(p.same_srv_rate).trigger('input');
+                    $('#diff_srv_rate').val(p.diff_srv_rate).trigger('input');
+                    $('#dst_host_count').val(p.dst_host_count);
+                    $('#dst_host_srv_count').val(p.dst_host_srv_count);
+                    
+                    // Flash effect on inputs
+                    $('input, select').css('border-color', 'var(--accent-blue)');
+                    setTimeout(() => {
+                        $('input, select').css('border-color', 'var(--card-border)');
+                    }, 500);
+                }
+            });
+
+            // Form Submit AJAX Prediction
+            $('#predictForm').submit(function(e) {
+                e.preventDefault();
+                
+                // Collect Form Data into JSON object
+                const formData = {
+                    duration: parseFloat($('#duration').val()),
+                    protocol_type: $('#protocol_type').val(),
+                    src_bytes: parseInt($('#src_bytes').val()),
+                    dst_bytes: parseInt($('#dst_bytes').val()),
+                    count: parseInt($('#count').val()),
+                    srv_count: parseInt($('#srv_count').val()),
+                    same_srv_rate: parseFloat($('#same_srv_rate').val()),
+                    diff_srv_rate: parseFloat($('#diff_srv_rate').val()),
+                    dst_host_count: parseInt($('#dst_host_count').val()),
+                    dst_host_srv_count: parseInt($('#dst_host_srv_count').val())
+                };
+
+                // Show Loader, Hide result and placeholder
+                $('#hudPlaceholder').hide();
+                $('#hudResult').hide();
+                $('#hudLoader').css('display', 'flex');
+
+                // Send request
+                $.ajax({
+                    url: '/predict',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        $('#hudLoader').hide();
+                        $('#hudResult').css('display', 'flex');
+
+                        // 1. Classification details
+                        const isAttack = response.prediction === 'attack';
+                        const resultHeader = $('#resultHeader');
+                        
+                        if (isAttack) {
+                            resultHeader.removeClass('normal').addClass('attack');
+                            $('#resultLabelVal').text('🚨 ATTACK FLAGGED');
+                        } else {
+                            resultHeader.removeClass('attack').addClass('normal');
+                            $('#resultLabelVal').text('🟢 NORMAL TRAFFIC');
+                        }
+
+                        // 2. Confidence circular gauge
+                        const confidence = response.confidence;
+                        $('#gaugeVal').text(confidence + '%');
+                        
+                        const gaugeColor = isAttack ? '#ef4444' : '#10b981';
+                        $('#gaugeCircle').css('background', `conic-gradient(${gaugeColor} ${confidence}%, rgba(255, 255, 255, 0.05) ${confidence}%)`);
+
+                        // 3. Attack probability
+                        $('#metricAttackProb').text(response.attack_probability + '%');
+                        $('#metricAttackBar').css('width', response.attack_probability + '%');
+
+                        // 4. Anomaly score
+                        const rawScore = response.anomaly_score;
+                        $('#metricIsoScore').text(rawScore.toFixed(4));
+                        
+                        // Map anomaly score to visual width: decision function is usually -0.5 to +0.5. 
+                        // Normalise to 0-100% for progress bar
+                        let normalizedScore = (rawScore + 0.5) * 100;
+                        normalizedScore = Math.max(0, Math.min(100, normalizedScore));
+                        
+                        const isoBar = $('#metricIsoBar');
+                        isoBar.css('width', normalizedScore + '%');
+                        
+                        if (response.anomaly_detected) {
+                            isoBar.css('background', 'var(--accent-red)');
+                        } else {
+                            isoBar.css('background', 'var(--accent-green)');
+                        }
+
+                        // 5. Anomaly notification alert
+                        const alertBox = $('#anomalyAlertBox');
+                        if (response.anomaly_detected) {
+                            alertBox.removeClass('clean').addClass('flagged');
+                            $('#anomalyAlertText').html('<strong>Warning:</strong> Anomaly detection engine flagged this transaction as outlier patterns.');
+                            alertBox.find('i').removeClass('fa-circle-info').addClass('fa-triangle-exclamation');
+                        } else {
+                            alertBox.removeClass('flagged').addClass('clean');
+                            $('#anomalyAlertText').text('Security status nominal: Transaction matches standard cluster bounds.');
+                            alertBox.find('i').removeClass('fa-triangle-exclamation').addClass('fa-check-double');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#hudLoader').hide();
+                        $('#hudPlaceholder').show().find('p').text('Error executing request: ' + (xhr.responseJSON?.error || error));
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
