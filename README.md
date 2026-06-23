@@ -80,8 +80,8 @@ Clone this repository and install dependencies inside a virtual environment:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/network-threat-detector.git
-cd network-threat-detector
+https://github.com/DhruviKava/CyberSec.git
+cd CyberSec
 
 # Create and activate virtual environment
 python3 -m venv netdet
@@ -153,17 +153,4 @@ curl -X POST http://localhost:5000/predict \
 ```
 
 ---
-
-## ☁️ Deployment Guide (Render - Free Hosting)
-
-This project is fully ready for deployment on **Render** (or similar Python hosting platforms). 
-
-1. Push your project code to a public/private **GitHub** repository.
-2. Sign up on [Render](https://render.com) and create a new **Web Service** linked to your repository.
-3. Configure the following parameters:
-   * **Runtime:** `Python`
-   * **Build Command:** `pip install -r requirements.txt && python train.py`
-   * **Start Command:** `gunicorn app.main:app`
-   * **Plan:** Select `Free`
-4. Click **Deploy**. Render will build the environment, compile the models, and launch your API with a public HTTPS URL.
 
