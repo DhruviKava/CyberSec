@@ -3,6 +3,17 @@
 > A premium, end-to-end Machine Learning pipeline that detects malicious network traffic using **Random Forest** (supervised) and **Isolation Forest** (unsupervised) classifiers. Served via a content-negotiated **Flask REST API** with a real-time, glassmorphism **SOC Web Dashboard**.
 
 ---
+<img width="1849" height="954" alt="Main_screen" src="https://github.com/user-attachments/assets/360a199c-f994-45b5-94dd-4b4290981f3d" />
+
+
+<img width="1849" height="954" alt="Normal_traffic" src="https://github.com/user-attachments/assets/f10429df-14b2-48a5-a96f-1d699d58bff7" />
+
+<img width="1849" height="954" alt="DDOS_SYN_flood" src="https://github.com/user-attachments/assets/62a87afd-1647-4e26-80b8-1b1af465a381" />
+
+<img width="1849" height="954" alt="Ping_of_Death" src="https://github.com/user-attachments/assets/bcfd1790-679a-4b55-8dd0-1e93e24c9617" />
+
+<img width="1849" height="954" alt="Port_scanning_UDP" src="https://github.com/user-attachments/assets/98d42490-7046-4fdf-bcb5-287ada125465" />
+
 
 ## 🗺️ High-Level Architecture
 
